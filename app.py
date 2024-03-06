@@ -31,7 +31,12 @@ def call():
 
 @app.route('/stream', methods=['GET'])
 def stream():
-    return handle_stream(request.environ.get('wsgi.websocket'), response_thread_id, verdict_thread_id)
+    return handle_stream(
+        request.environ.get('wsgi.websocket'),
+        response_thread_id,
+        verdict_thread_id,
+        call_start_time
+    )
 
 
 if __name__ == '__main__':

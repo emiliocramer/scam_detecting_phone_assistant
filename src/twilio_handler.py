@@ -6,7 +6,6 @@ from flask_sock import ConnectionClosed
 from twilio.twiml.voice_response import VoiceResponse, Start
 import vosk
 
-from app import call_start_time
 from src.config import VOSK_MODEL_PATH
 from src.openai_handler import send_message_to_assistant, run_assistant, get_assistant_response
 from src.utils import save_call_log, get_float_verdict
@@ -25,7 +24,7 @@ def handle_incoming_call(request):
     return str(response), 200, {'Content-Type': 'text/xml'}
 
 
-def handle_stream(ws, response_thread_id, verdict_thread_id):
+def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
     lines = []
     rec = vosk.KaldiRecognizer(model, 16000)
     buffer = ""
