@@ -1,9 +1,9 @@
 from openai import OpenAI
-
-from src.config import RESPONSE_ASSISTANT_ID
-from src.config import VERDICT_ASSISTANT_ID
 from src.utils import check_run_status_and_get_response
-client = OpenAI
+from src.config import OPENAI_API_KEY
+client = OpenAI(
+    api_key=OPENAI_API_KEY
+)
 
 
 def send_message_to_assistant(thread_id, message):
@@ -14,10 +14,10 @@ def send_message_to_assistant(thread_id, message):
     )
 
 
-def run_assistant(thread_id):
+def run_assistant(thread_id, assistant_id):
     return client.beta.threads.runs.create(
         thread_id=thread_id,
-        assistant_id=RESPONSE_ASSISTANT_ID
+        assistant_id=assistant_id
     )
 
 

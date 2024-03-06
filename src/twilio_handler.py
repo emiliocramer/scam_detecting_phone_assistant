@@ -6,9 +6,12 @@ from flask_sock import ConnectionClosed
 from twilio.twiml.voice_response import VoiceResponse, Start
 import vosk
 
-from src.config import VOSK_MODEL_PATH
 from src.openai_handler import send_message_to_assistant, run_assistant, get_assistant_response
 from src.utils import save_call_log, get_float_verdict
+
+from src.config import VOSK_MODEL_PATH
+from src.config import RESPONSE_ASSISTANT_ID
+from src.config import VERDICT_ASSISTANT_ID
 
 model = vosk.Model(VOSK_MODEL_PATH)
 
@@ -59,7 +62,7 @@ def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
 
                         # construct message and send to assistant
                         _ = send_message_to_assistant(thread_id=response_thread_id, message=buffer.strip())
-                        response_run = run_assistant(thread_id=response_thread_id)
+                        response_run = run_assistant(thread_id=response_thread_id, assistant_id=RESPONSE_ASSISTANT_ID)
                         line = {
                             'speaker': 'caller',
                             'text': buffer.strip(),
@@ -78,7 +81,7 @@ def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
 
                         # construct active verdict
                         _ = send_message_to_assistant(thread_id=verdict_thread_id, message=lines)
-                        verdict_run = run_assistant(thread_id=verdict_thread_id)
+                        verdict_run = run_assistant(thread_id=verdict_thread_id, assistant_id=VERDICT_ASSISTANT_ID)
                         verdict = get_assistant_response(thread_id=verdict_thread_id, run_id=verdict_run.id)
                         float_verdict = get_float_verdict(verdict)
                         if float_verdict > 0.85:
