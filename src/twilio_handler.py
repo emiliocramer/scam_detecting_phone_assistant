@@ -16,18 +16,8 @@ from src.config import VERDICT_ASSISTANT_ID
 model = vosk.Model(VOSK_MODEL_PATH)
 
 
-def handle_incoming_call(request):
-    response = VoiceResponse()
-    start = Start()
-    start.stream(url=f'wss://{request.host}/stream')
-    response.append(start)
-    response.say('Hey... this is emilio\'s assistant, how can i help you today?.')
-    response.pause(length=1000)
-    print(f'Incoming call from {request.form["From"]}')
-    return str(response), 200, {'Content-Type': 'text/xml'}
-
-
 def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
+    print("entered stream")
     lines = []
     rec = vosk.KaldiRecognizer(model, 16000)
     buffer = ""

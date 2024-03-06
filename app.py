@@ -3,7 +3,8 @@ from datetime import datetime
 from src.openai_handler import client
 
 # twilio
-from src.twilio_handler import handle_incoming_call, handle_stream
+from src.twilio_handler import handle_stream
+from twilio.twiml.voice_response import VoiceResponse, Start
 from twilio.rest import Client
 from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 
@@ -26,7 +27,15 @@ def call():
     verdict_thread = client.beta.threads.create()
     response_thread_id, verdict_thread_id = response_thread.id, verdict_thread.id
 
-    return handle_incoming_call(request)
+    # start stream
+    response = VoiceResponse()
+    start = Start()
+    start.stream(url=f'wss://{request.host}/stream')
+    response.append(start)
+    response.say('Hey... this is emilio\'s assistant, how can i help you today?.')
+    response.pause(length=1000)
+    print(f'Incoming call from {request.form["From"]}')
+    return str(response), 200, {'Content-Type': 'text/xml'}
 
 
 @app.route('/stream', methods=['GET'])
