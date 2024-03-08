@@ -1,15 +1,16 @@
 from flask import Flask, request
+from flask_sock import Sock
 from datetime import datetime
 from src.openai_handler import client
 
 # twilio
-from src.twilio_handler import handle_stream
-from twilio.twiml.voice_response import VoiceResponse, Start
+from src.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
 from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 app = Flask(__name__)
+sock = Sock(app)
 
 # globals
 call_start_time = 0
@@ -22,36 +23,29 @@ def call():
     global call_start_time
     global response_thread_id
     global verdict_thread_id
+
     call_start_time = datetime.now()
     response_thread = client.beta.threads.create()
     verdict_thread = client.beta.threads.create()
     response_thread_id, verdict_thread_id = response_thread.id, verdict_thread.id
 
-    # start stream
-    response = VoiceResponse()
-    start = Start()
-    start.stream(url=f'wss://{request.host}/stream')
-    response.append(start)
-    response.say('Hey... this is emilio\'s assistant, how can i help you today?.')
-    response.pause(length=1000)
-    print(f'Incoming call from {request.form["From"]}')
-    return str(response), 200, {'Content-Type': 'text/xml'}
+    return handle_incoming_call(request)
 
 
-@app.route('/stream', methods=['GET'])
-def stream():
+@sock.route('/stream')
+def stream(ws):
     return handle_stream(
-        request.environ.get('wsgi.websocket'),
+        ws,
         response_thread_id,
         verdict_thread_id,
-        call_start_time
+        call_start_time,
     )
 
 
 if __name__ == '__main__':
     from pyngrok import ngrok
 
-    port = '5010'
+    port = '5011'
     public_url = ngrok.connect(port, bind_tls=True).public_url
     number = twilio_client.incoming_phone_numbers.list()[0]
     number.update(voice_url=public_url + '/call')

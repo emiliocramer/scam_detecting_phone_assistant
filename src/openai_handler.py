@@ -7,6 +7,7 @@ client = OpenAI(
 
 
 def send_message_to_assistant(thread_id, message):
+    print(f"message received: {message}")
     return client.beta.threads.messages.create(
         thread_id=thread_id,
         role='user',
