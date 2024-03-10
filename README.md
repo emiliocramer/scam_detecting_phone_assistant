@@ -1,4 +1,6 @@
-# README for the Flask-Based Voice Assistant Application
+# This README is outdated and will be updated in due time
+
+## README for the Flask-Based Voice Assistant Application
 
 This README document provides an overview and setup instructions for a Flask-based voice assistant application designed to process incoming phone calls and evaluate them for potential scams. By integrating OpenAI's beta Assistant API for dynamic response generation and conversation analysis, Twilio for voice communication, Vosk for speech-to-text conversion, and ngrok for exposing a local development server to the Internet, the application acts as a sophisticated intermediary capable of detecting and responding to potential scam attempts over the phone.
 
