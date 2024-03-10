@@ -3,15 +3,12 @@ import base64
 import json
 
 from twilio.base.exceptions import TwilioRestException
-from twilio.rest import Client
 
 from src.openai.openai_handler import send_message_to_assistant, run_assistant, handle_get_assistant_response
 from src.config import RESPONSE_ASSISTANT_ID
 from src.config import VERDICT_ASSISTANT_ID
-from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
+from src.config import twilio_client
 from src.utils import add_line_to_log, app_logger
-
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 call_sid = ""
 

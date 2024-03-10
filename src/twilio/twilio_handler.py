@@ -2,14 +2,11 @@ import json
 import time
 from flask_sock import ConnectionClosed
 from twilio.twiml.voice_response import VoiceResponse, Start, Record
-from twilio.rest import Client
 import vosk
 
 from src.twilio.twilio_helpers import handle_incoming_packet
 from src.utils import save_call_log, app_logger
 from src.config import VOSK_MODEL_PATH
-from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 model = vosk.Model(VOSK_MODEL_PATH)
 CL = '\x1b[0K'

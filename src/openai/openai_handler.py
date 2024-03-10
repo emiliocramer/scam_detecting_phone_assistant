@@ -1,18 +1,14 @@
 import time
 
-from openai import OpenAI, OpenAIError
+from openai import OpenAIError
 
-from src.config import OPENAI_API_KEY
 from src.utils import app_logger
-
-client = OpenAI(
-    api_key=OPENAI_API_KEY
-)
+from src.config import openai_client
 
 
 def create_thread():
     try:
-        return client.beta.threads.create()
+        return openai_client.beta.threads.create()
     except OpenAIError as e:
         app_logger.error(f"failed to create a new thread: {e}")
 
@@ -20,7 +16,7 @@ def create_thread():
 def send_message_to_assistant(thread_id, message):
     try:
         app_logger.debug(f"message received: {message}")
-        return client.beta.threads.messages.create(
+        return openai_client.beta.threads.messages.create(
             thread_id=thread_id,
             role='user',
             content=message
@@ -31,7 +27,7 @@ def send_message_to_assistant(thread_id, message):
 
 def run_assistant(thread_id, assistant_id):
     try:
-        return client.beta.threads.runs.create(
+        return openai_client.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=assistant_id
         )
@@ -51,7 +47,7 @@ def handle_get_assistant_response(thread_id, run_id):
 
 def retrieve_assistant_status(thread_id, run_id):
     try:
-        run_status = client.beta.threads.runs.retrieve(
+        run_status = openai_client.beta.threads.runs.retrieve(
             thread_id=thread_id,
             run_id=run_id
         )
@@ -63,7 +59,7 @@ def retrieve_assistant_status(thread_id, run_id):
 
 def retrieve_assistant_response(thread_id):
     try:
-        messages_response = client.beta.threads.messages.list(thread_id)
+        messages_response = openai_client.beta.threads.messages.list(thread_id)
         messages = messages_response.data
         latest_message = messages[0].content[0].text.value
         return latest_message
