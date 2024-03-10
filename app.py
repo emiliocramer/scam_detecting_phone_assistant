@@ -43,7 +43,7 @@ def stream(ws):
 if __name__ == '__main__':
     from pyngrok import ngrok
 
-    port = '5011'
+    port = '5012'
     public_url = ngrok.connect(port, bind_tls=True).public_url
     number = twilio_client.incoming_phone_numbers.list()[0]
     number.update(voice_url=public_url + '/call')
