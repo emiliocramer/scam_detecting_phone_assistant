@@ -5,7 +5,6 @@ import json
 from twilio.base.exceptions import TwilioRestException
 
 from src.openai.openai_handler import send_message_to_assistant, run_assistant, handle_get_assistant_response
-from src.config import RESPONSE_ASSISTANT_ID
 from src.config import VERDICT_ASSISTANT_ID
 from src.config import twilio_client
 from src.utils import add_line_to_log, app_logger
