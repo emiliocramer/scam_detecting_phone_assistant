@@ -21,19 +21,19 @@ register_profile_api(app)
 sock = Sock(app)
 
 call_start_time = 0
-response_thread_id = 0
-verdict_thread_id = 0
+openai_ids = {}
 
 
 @app.route('/call/<userId>', methods=['POST'])
 def call(user_id):
-    global call_start_time, response_thread_id, verdict_thread_id
+    global call_start_time, openai_ids
     try:
         call_start_time = datetime.now()
         response_thread = create_thread()
         verdict_thread = create_thread()
-        response_thread_id, verdict_thread_id = response_thread.id, verdict_thread.id
 
+        openai_ids['verdict_thread_id'] = verdict_thread.id
+        openai_ids['response_thread_id'] = response_thread.id
         return handle_incoming_call(request, user_id)
     except Exception as e:
         app_logger.error(f'Error in call route with userId {user_id}: {e}', exc_info=True)
@@ -42,14 +42,15 @@ def call(user_id):
 
 @sock.route('/stream/<user_id>')
 def stream(ws, user_id):
+    global openai_ids
     try:
         personal_profile_collection = db['personal_profiles']
         profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
         if not profile:
             return jsonify({'error': 'Profile not found'}), 404
 
-        response_assistant_id = str(profile['assistant_id'])
-        return handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time, response_assistant_id)
+        openai_ids['response_assistant_id'] = str(profile['assistant_id'])
+        return handle_stream(ws, call_start_time, openai_ids)
     except Exception as e:
         app_logger.error(f'Error in stream route: {e}', exc_info=True)
         return "An error occurred", 500

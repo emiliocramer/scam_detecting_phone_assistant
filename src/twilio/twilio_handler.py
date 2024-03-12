@@ -33,7 +33,7 @@ def handle_incoming_call(request, user_id):
     return str(response), 200, {'Content-Type': 'text/xml'}
 
 
-def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time, response_assistant_id):
+def handle_stream(ws, call_start_time, openai_ids):
     app_logger.debug("entered audio stream")
     global lines
     global rec
@@ -52,11 +52,9 @@ def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time, re
                     rec,
                     utterance,
                     silence_counter,
-                    response_thread_id,
-                    verdict_thread_id,
                     lines,
                     call_sid,
-                    response_assistant_id
+                    openai_ids
                 )
 
     except ConnectionClosed:
