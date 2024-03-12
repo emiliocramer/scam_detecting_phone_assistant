@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 from flask_sock import Sock
 from datetime import datetime
 from src.openai.openai_handler import create_thread
@@ -6,9 +7,12 @@ from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
 from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 from src.utils import app_logger
+from src.api.twilio import register_twilio_api
 
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 app = Flask(__name__)
+CORS(app)
+register_twilio_api(app)
 sock = Sock(app)
 
 call_start_time = 0
@@ -43,7 +47,7 @@ def stream(ws):
 if __name__ == '__main__':
     from pyngrok import ngrok
 
-    port = '5012'
+    port = '5014'
     public_url = ngrok.connect(port, bind_tls=True).public_url
     number = twilio_client.incoming_phone_numbers.list()[0]
     number.update(voice_url=public_url + '/call')
