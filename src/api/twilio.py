@@ -55,7 +55,7 @@ def create_twilio_user():
         return jsonify({'error': str(e)}), 500
 
 
-@twilio_api.route('/api/twilio/configure-phone')
+@twilio_api.route('/api/twilio/configure-phone', methods=['POST'])
 def configure_twilio_phone():
     try:
         data = request.get_json()
