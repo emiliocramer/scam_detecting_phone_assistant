@@ -13,7 +13,7 @@ from src.utils import add_line_to_log, app_logger
 call_sid = ""
 
 
-def handle_incoming_packet(packet, rec, utterance, silence_counter, response_thread_id, verdict_thread_id, lines, sid):
+def handle_incoming_packet(packet, rec, utterance, silence_counter, response_thread_id, verdict_thread_id, lines, sid, response_assistant_id):
     global call_sid
     call_sid = sid
 
@@ -31,7 +31,8 @@ def handle_incoming_packet(packet, rec, utterance, silence_counter, response_thr
             utterance,
             response_thread_id,
             verdict_thread_id,
-            lines
+            lines,
+            response_assistant_id
         )
 
     return utterance, silence_counter, lines
@@ -52,27 +53,27 @@ def is_partial_waveform(rec, silence_counter):
     return 0
 
 
-def handle_process_utterance(utterance, response_thread_id, verdict_thread_id, lines):
+def handle_process_utterance(utterance, response_thread_id, verdict_thread_id, lines, response_assistant_id):
     updated_lines = lines
     app_logger.debug("silence threshold met")
 
     if utterance.strip() != "":
-        updated_lines = process_utterance(utterance.strip(), lines, response_thread_id, verdict_thread_id)
+        updated_lines = process_utterance(utterance.strip(), lines, response_thread_id, verdict_thread_id, response_assistant_id)
     return 0, "", updated_lines
 
 
-def process_utterance(utterance, lines, response_thread_id, verdict_thread_id):
+def process_utterance(utterance, lines, response_thread_id, verdict_thread_id, response_assistant_id):
     app_logger.debug(f"sending the following message to the assistant: {utterance}")
 
-    log_with_response = generate_response(response_thread_id, utterance, lines)
+    log_with_response = generate_response(response_thread_id, utterance, lines, response_assistant_id)
     log_with_verdict = generate_verdict(verdict_thread_id, log_with_response)
 
     return log_with_verdict
 
 
-def generate_response(response_thread_id, utterance, lines):
+def generate_response(response_thread_id, utterance, lines, response_assistant_id):
     _ = send_message_to_assistant(thread_id=response_thread_id, message=utterance)
-    response_run = run_assistant(thread_id=response_thread_id, assistant_id=RESPONSE_ASSISTANT_ID)
+    response_run = run_assistant(thread_id=response_thread_id, assistant_id=response_assistant_id)
 
     lines = add_line_to_log(lines, utterance, 'caller')
     response = handle_get_assistant_response(thread_id=response_thread_id, run_id=response_run.id)

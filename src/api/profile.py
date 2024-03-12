@@ -1,3 +1,5 @@
+import json
+
 from flask import request, jsonify, Blueprint
 from src.db.config import db
 from src.api.twilio import twilio_api
@@ -48,14 +50,14 @@ def update_user_profile(user_id):
             }}
         )
 
-        personal_profile = f'''{
-            "full_name": {data['full_name']},
-            "birthdate": {data['birthdate']},
-            "available_schedule": {data['available_schedule']},
-            "city": {data['city']},
-            "profession": {data['profession']},
-            "interests": {data['interests']}
-        }'''
+        personal_profile = json.dumps({
+            "full_name": data['full_name'],
+            "birthdate": data['birthdate'],
+            "available_schedule": data['available_schedule'],
+            "city": data['city'],
+            "profession": data['profession'],
+            "interests": data['interests']
+        })
 
         personalized_instructions = create_assistant_instructions(personal_profile)
         _ = modify_assistant(data['assistant_id'], personalized_instructions)
@@ -66,6 +68,7 @@ def update_user_profile(user_id):
         return jsonify({'message': 'Profile updated successfully'}), 200
 
     except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500
 
 

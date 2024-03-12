@@ -1,8 +1,10 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sock import Sock
 from datetime import datetime
+from bson import ObjectId
 
+from src.db.config import db
 from src.api.profile import register_profile_api
 from src.openai.openai_handler import create_thread
 from src.twilio.twilio_handler import handle_incoming_call, handle_stream
@@ -23,8 +25,8 @@ response_thread_id = 0
 verdict_thread_id = 0
 
 
-@app.route('/call', methods=['POST'])
-def call():
+@app.route('/call/<userId>', methods=['POST'])
+def call(user_id):
     global call_start_time, response_thread_id, verdict_thread_id
     try:
         call_start_time = datetime.now()
@@ -32,27 +34,30 @@ def call():
         verdict_thread = create_thread()
         response_thread_id, verdict_thread_id = response_thread.id, verdict_thread.id
 
-        return handle_incoming_call(request)
+        return handle_incoming_call(request, user_id)
     except Exception as e:
-        app_logger.error(f'Error in call route: {e}', exc_info=True)
+        app_logger.error(f'Error in call route with userId {user_id}: {e}', exc_info=True)
         return "An error occurred", 500
 
 
-@sock.route('/stream')
-def stream(ws):
+@sock.route('/stream/<user_id>')
+def stream(ws, user_id):
     try:
-        return handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time)
+        personal_profile_collection = db['personal_profiles']
+        profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
+        if not profile:
+            return jsonify({'error': 'Profile not found'}), 404
+
+        response_assistant_id = str(profile['assistant_id'])
+        return handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time, response_assistant_id)
     except Exception as e:
         app_logger.error(f'Error in stream route: {e}', exc_info=True)
         return "An error occurred", 500
 
 
 if __name__ == '__main__':
-    from pyngrok import ngrok
-
     port = '5014'
-    public_url = ngrok.connect(port, bind_tls=True).public_url
-    number = twilio_client.incoming_phone_numbers.list()[0]
-    number.update(voice_url=public_url + '/call')
-    print(f'Waiting for calls on {number.phone_number}')
     app.run(port=int(port))
+
+
+

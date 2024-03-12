@@ -19,7 +19,7 @@ utterance = ''
 silence_counter = 0
 
 
-def handle_incoming_call(request):
+def handle_incoming_call(request, user_id):
     global call_sid
     call_sid = request.form["CallSid"]
     response = VoiceResponse()
@@ -33,7 +33,7 @@ def handle_incoming_call(request):
     return str(response), 200, {'Content-Type': 'text/xml'}
 
 
-def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
+def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time, response_assistant_id):
     app_logger.debug("entered audio stream")
     global lines
     global rec
@@ -55,7 +55,8 @@ def handle_stream(ws, response_thread_id, verdict_thread_id, call_start_time):
                     response_thread_id,
                     verdict_thread_id,
                     lines,
-                    call_sid
+                    call_sid,
+                    response_assistant_id
                 )
 
     except ConnectionClosed:
