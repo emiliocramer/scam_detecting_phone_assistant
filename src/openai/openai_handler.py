@@ -15,6 +15,16 @@ def create_assistant(instructions):
     return assistant
 
 
+def modify_assistant(assistant_id, instructions):
+    updated_assistant = openai_client.beta.assistants.update(
+        assistant_id,
+        instructions=instructions,
+        name="Personal Response Assistant",
+        model="gpt-4-turbo-preview",
+    )
+    return updated_assistant
+
+
 def create_thread():
     try:
         return openai_client.beta.threads.create()

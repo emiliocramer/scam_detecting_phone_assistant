@@ -3,6 +3,9 @@ from src.db.config import db
 from src.api.twilio import twilio_api
 from bson import ObjectId
 
+from src.openai.openai_handler import modify_assistant
+from src.openai.openai_helpers import create_assistant_instructions
+
 profile_api = Blueprint('profile_api', __name__)
 
 
@@ -44,6 +47,18 @@ def update_user_profile(user_id):
                 'profession': data['profession']
             }}
         )
+
+        personal_profile = f'''{
+            "full_name": {data['full_name']},
+            "birthdate": {data['birthdate']},
+            "available_schedule": {data['available_schedule']},
+            "city": {data['city']},
+            "profession": {data['profession']},
+            "interests": {data['interests']}
+        }'''
+
+        personalized_instructions = create_assistant_instructions(personal_profile)
+        _ = modify_assistant(data['assistant_id'], personalized_instructions)
 
         if result.modified_count == 0:
             return jsonify({'message': 'No changes were made to the profile'}), 200
