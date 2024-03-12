@@ -18,3 +18,4 @@ twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 openai_client = OpenAI(
     api_key=OPENAI_API_KEY
 )
+

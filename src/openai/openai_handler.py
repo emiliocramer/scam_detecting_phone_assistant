@@ -6,6 +6,15 @@ from src.utils import app_logger
 from src.config import openai_client
 
 
+def create_assistant(instructions):
+    assistant = openai_client.beta.assistants.create(
+        instructions=instructions,
+        name="Personal Response Assistant",
+        model="gpt-4-turbo-preview",
+    )
+    return assistant
+
+
 def create_thread():
     try:
         return openai_client.beta.threads.create()

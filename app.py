@@ -2,6 +2,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_sock import Sock
 from datetime import datetime
+
+from src.api.profile import register_profile_api
 from src.openai.openai_handler import create_thread
 from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
@@ -13,6 +15,7 @@ twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 app = Flask(__name__)
 CORS(app)
 register_twilio_api(app)
+register_profile_api(app)
 sock = Sock(app)
 
 call_start_time = 0

@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from src.db.config import db
 from bson import ObjectId
 
+from src.openai.openai_handler import create_assistant
+
 twilio_api = Blueprint('twilio_api', __name__)
 
 
@@ -28,12 +30,18 @@ def create_twilio_user():
             'auth_token': auth_token
         }
 
+        personal_assistant = create_assistant("")
+
         result = twilio_users_collection.insert_one(user_data)
         personal_profile_data = {
             '_id': user_id,
+            'assistant_id': personal_assistant.id,
             'full_name': "",
             'available_schedule': "",
             'birthdate': "",
+            'city': "",
+            'profession': "",
+            'interests': "",
         }
 
         personal_profile_collection = db['personal_profiles']
