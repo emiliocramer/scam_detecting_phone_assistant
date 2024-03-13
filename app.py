@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_sock import Sock
 from datetime import datetime
 from bson import ObjectId
+import os
 
 from src.db.config import db
 from src.api.profile import register_profile_api
@@ -62,8 +63,8 @@ def stream(ws, user_id):
 
 
 if __name__ == '__main__':
-    port = '5014'
-    app.run(port=int(port))
+    port = int(os.environ.get('PORT', 5014))  # Default to 5014 if PORT is not provided
+    app.run(host='0.0.0.0', port=port)
 
 
 
