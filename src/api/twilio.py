@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from src.db.config import db
 from bson import ObjectId
 from twilio.rest import Client
-from pyngrok import ngrok
 
 from src.openai.openai_handler import create_assistant
 
@@ -72,10 +71,8 @@ def configure_twilio_phone():
             return jsonify({'error': 'Missing account_sid or auth_token or user_id'}), 400
 
         twilio_client = Client(account_sid, auth_token)
-        port = '5014'
 
-        public_url = ngrok.connect(port, bind_tls=True).public_url
-        new_voice_url = f'{public_url}/call/{user_id}'
+        new_voice_url = f'https://hang-up-c98880200178.herokuapp.com/call/{user_id}'
         number = twilio_client.incoming_phone_numbers.list()[0]
         number.update(voice_url=new_voice_url)
 
