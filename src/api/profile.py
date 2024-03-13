@@ -72,5 +72,49 @@ def update_user_profile(user_id):
         return jsonify({'error': str(e)}), 500
 
 
+@profile_api.route('/api/call-settings/<user_id>', methods=['GET'])
+def get_user_call_settings(user_id):
+    try:
+        personal_profile_collection = db['personal_profiles']
+        profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
+
+        if not profile:
+            return jsonify({'error': 'Profile not found'}), 404
+
+        return jsonify(
+            {'opening_line': profile.get('opening_line', ''), 'closing_line': profile.get('closing_line', '')}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@profile_api.route('/api/call-settings/<user_id>', methods=['PUT'])
+def update_user_call_settings(user_id):
+    try:
+        data = request.get_json()
+        personal_profile_collection = db['personal_profiles']
+
+        existing_profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
+        if not existing_profile:
+            return jsonify({'error': 'Profile not found'}), 404
+
+        result = personal_profile_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {
+                'opening_line': data['opening_line'],
+                'closing_line': data['closing_line']
+            }}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({'message': 'No changes were made to the profile'}), 200
+
+        return jsonify({'message': 'Profile updated successfully'}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
 def register_profile_api(app):
     app.register_blueprint(profile_api)

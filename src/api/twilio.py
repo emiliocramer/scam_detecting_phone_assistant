@@ -20,10 +20,16 @@ def create_twilio_user():
             return jsonify({'error': 'Missing account_sid or auth_token'}), 400
 
         twilio_users_collection = db['twilio_users']
-        existing_user = twilio_users_collection.find_one({'account_sid': account_sid})
-
+        existing_user = twilio_users_collection.find_one(
+            {'account_sid': account_sid},
+            {'auth_token': auth_token}
+        )
+        print(existing_user)
         if existing_user:
-            return jsonify({'error': 'A user with this account_sid already exists'}), 409
+            return jsonify({
+                'message': 'A user already exists, logging in',
+                'user_id': str(existing_user['_id'])
+            }), 200
 
         user_id = ObjectId()
         user_data = {

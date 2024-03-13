@@ -24,7 +24,7 @@ call_start_time = 0
 openai_ids = {}
 
 
-@app.route('/call/<userId>', methods=['POST'])
+@app.route('/call/<user_id>', methods=['POST'])
 def call(user_id):
     global call_start_time, openai_ids
     try:
@@ -50,7 +50,8 @@ def stream(ws, user_id):
             return jsonify({'error': 'Profile not found'}), 404
 
         openai_ids['response_assistant_id'] = str(profile['assistant_id'])
-        return handle_stream(ws, call_start_time, openai_ids)
+        closing_line = profile['closing_line']
+        return handle_stream(ws, call_start_time, openai_ids, closing_line)
     except Exception as e:
         app_logger.error(f'Error in stream route: {e}', exc_info=True)
         return "An error occurred", 500

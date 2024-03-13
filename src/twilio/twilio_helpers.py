@@ -12,7 +12,7 @@ from src.utils import add_line_to_log, app_logger
 call_sid = ""
 
 
-def handle_incoming_packet(packet, rec, utterance, silence_counter, lines, sid, openai_ids):
+def handle_incoming_packet(packet, rec, utterance, silence_counter, lines, sid, openai_ids, closing_line):
     global call_sid
     call_sid = sid
 
