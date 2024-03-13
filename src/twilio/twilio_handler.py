@@ -24,22 +24,35 @@ silence_counter = 0
 
 def handle_incoming_call(request, user_id):
     global call_sid
-    call_sid = request.form["CallSid"]
+    try:
+        call_sid = request.form["CallSid"]
+        app_logger.info(f"Handling incoming call - SID: {call_sid}, UserID: {user_id}")
 
-    personal_profile_collection = db['personal_profiles']
-    profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
-    if not profile:
-        return jsonify({'error': 'Profile not found'}), 404
+        profile = db['personal_profiles'].find_one({'_id': ObjectId(user_id)})
+        if not profile:
+            app_logger.error(f"Profile not found - UserID: {user_id}")
+            return jsonify({'error': 'Profile not found'}), 404
 
-    response = VoiceResponse()
-    start = Start()
-    start.stream(url=f'wss://{request.host}/stream/{user_id}')
-    response.append(start)
-    response.say(profile['opening_line'])
-    record = Record(timeout=10000)
-    response.append(record)
-    print(f'Incoming call from {request.form["From"]}')
-    return str(response), 200, {'Content-Type': 'text/xml'}
+        response = VoiceResponse()
+        start = Start()
+        stream_url = f'wss://{request.host}/stream/{user_id}'
+        start.stream(url=stream_url)
+        response.append(start)
+        app_logger.info(f"Streaming setup - URL: {stream_url}")
+
+        opening_line = profile.get('opening_line', 'Hello, your call is very important to us.')
+        response.say(opening_line)
+        app_logger.info(f"Opening line delivered - UserID: {user_id}, Line: {opening_line}")
+
+        record_timeout = 10000  # Default timeout for recording
+        record = Record(timeout=record_timeout)
+        response.append(record)
+        app_logger.info(f"Call recording started - Timeout: {record_timeout}ms")
+
+        return str(response), 200, {'Content-Type': 'text/xml'}
+    except Exception as e:
+        app_logger.error(f"Error handling incoming call - UserID: {user_id}, Error: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 
 def handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client):

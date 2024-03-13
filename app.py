@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_sock import Sock
 from datetime import datetime
 from bson import ObjectId
+import logging
 import os
 
 from src.db.config import db
@@ -12,6 +13,11 @@ from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
 from src.utils import app_logger
 from src.api.twilio import register_twilio_api
+
+app_logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+app_logger.addHandler(handler)
 
 app = Flask(__name__)
 CORS(app)
@@ -33,6 +39,7 @@ def call(user_id):
 
         openai_ids['verdict_thread_id'] = verdict_thread.id
         openai_ids['response_thread_id'] = response_thread.id
+
         return handle_incoming_call(request, user_id)
     except Exception as e:
         app_logger.error(f'Error in call route with userId {user_id}: {e}', exc_info=True)
@@ -43,16 +50,17 @@ def call(user_id):
 def stream(ws, user_id):
     global openai_ids
     try:
-        personal_profile_collection = db['personal_profiles']
-        profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
+        profile = db['personal_profiles'].find_one({'_id': ObjectId(user_id)})
         if not profile:
+            app_logger.error(f'Profile not found for userId {user_id}')
             return jsonify({'error': 'Profile not found'}), 404
+
         openai_ids['response_assistant_id'] = str(profile['assistant_id'])
         closing_line = profile['closing_line']
 
-        twilio_users_collection = db['twilio_users']
-        twilio_user = twilio_users_collection.find_one({'_id': ObjectId(user_id)})
+        twilio_user = db['twilio_users'].find_one({'_id': ObjectId(user_id)})
         if not twilio_user:
+            app_logger.error(f'twilio user not found for userId {user_id}')
             return jsonify({'error': 'Twilio User not found'}), 404
 
         twilio_client = Client(twilio_user['account_sid'], twilio_user['auth_token'])
