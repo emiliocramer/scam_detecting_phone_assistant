@@ -72,8 +72,8 @@ def configure_twilio_phone():
             return jsonify({'error': 'Missing account_sid or auth_token or user_id'}), 400
 
         twilio_client = Client(account_sid, auth_token)
-
         port = '5014'
+
         public_url = ngrok.connect(port, bind_tls=True).public_url
         new_voice_url = f'{public_url}/call/{user_id}'
         number = twilio_client.incoming_phone_numbers.list()[0]
