@@ -9,11 +9,9 @@ from src.api.profile import register_profile_api
 from src.openai.openai_handler import create_thread
 from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
-from src.config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 from src.utils import app_logger
 from src.api.twilio import register_twilio_api
 
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 app = Flask(__name__)
 CORS(app)
 register_twilio_api(app)
@@ -48,10 +46,16 @@ def stream(ws, user_id):
         profile = personal_profile_collection.find_one({'_id': ObjectId(user_id)})
         if not profile:
             return jsonify({'error': 'Profile not found'}), 404
-
         openai_ids['response_assistant_id'] = str(profile['assistant_id'])
         closing_line = profile['closing_line']
-        return handle_stream(ws, call_start_time, openai_ids, closing_line)
+
+        twilio_users_collection = db['twilio_users']
+        twilio_user = twilio_users_collection.find_one({'_id': ObjectId(user_id)})
+        if not twilio_user:
+            return jsonify({'error': 'Twilio User not found'}), 404
+
+        twilio_client = Client(twilio_user['account_sid'], twilio_user['auth_token'])
+        return handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client)
     except Exception as e:
         app_logger.error(f'Error in stream route: {e}', exc_info=True)
         return "An error occurred", 500

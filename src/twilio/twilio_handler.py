@@ -42,7 +42,7 @@ def handle_incoming_call(request, user_id):
     return str(response), 200, {'Content-Type': 'text/xml'}
 
 
-def handle_stream(ws, call_start_time, openai_ids, closing_line):
+def handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client):
     app_logger.debug("entered audio stream")
     global lines
     global rec
@@ -64,7 +64,8 @@ def handle_stream(ws, call_start_time, openai_ids, closing_line):
                     lines,
                     call_sid,
                     openai_ids,
-                    closing_line
+                    closing_line,
+                    twilio_client
                 )
 
     except ConnectionClosed:
