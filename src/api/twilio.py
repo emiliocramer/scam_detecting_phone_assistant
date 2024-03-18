@@ -7,7 +7,7 @@ from src.openai.openai_handler import create_assistant
 twilio_api = Blueprint('twilio_api', __name__)
 
 
-@twilio_api.route('/api/twilio/get-available-numbers', methods=['POST'])
+@twilio_api.route('/api/twilio/get-available-numbers', methods=['GET'])
 def get_available_numbers():
     print(twilio_client.incoming_phone_numbers.list())
 
