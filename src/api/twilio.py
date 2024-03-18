@@ -30,7 +30,10 @@ def get_active_number(user_id):
         if not account:
             return jsonify({'error': 'account not found'}), 404
 
-        return jsonify({'active_number': account.get('number', 'No active number associated to this account')}), 200
+        if account.get('number') == '':
+            return jsonify({'active_number': 'No active number associated to this account'}), 200
+        else:
+            return jsonify({'active_number': account.get('number')}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
