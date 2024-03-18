@@ -7,13 +7,13 @@ import logging
 import os
 
 from src.db.config import db
+from src.api.auth import register_auth_api
 from src.api.profile import register_profile_api
 from src.api.twilio import register_twilio_api
 from src.openai.openai_handler import create_thread
 from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
 from src.utils import app_logger
-from src.api.auth import register_auth_api
 
 app_logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
