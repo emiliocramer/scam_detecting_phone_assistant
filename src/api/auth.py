@@ -40,7 +40,7 @@ def create_new_user():
             '_id': user_id,
             'username': username,
             'email': email,
-            'password': hashed_password  # Store the hashed password
+            'password': hashed_password
         }
 
         personal_assistant = create_assistant("")
@@ -66,17 +66,17 @@ def create_new_user():
 def login():
     try:
         data = request.get_json()
-        username = data.get('username')
+        email = data.get('email')
         password = data.get('password')
 
-        if not username or not password:
+        if not email or not password:
             return jsonify({'error': 'Missing username or password'}), 400
 
-        user = db['user_accounts'].find_one({'username': username})
+        user = db['user_accounts'].find_one({'email': email})
         if user and check_password_hash(user['password'], password):
             return jsonify({'message': 'Login successful', 'user_id': str(user['_id'])}), 200
         else:
-            return jsonify({'error': 'Invalid username or password'}), 401
+            return jsonify({'error': 'Invalid email or password'}), 401
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
