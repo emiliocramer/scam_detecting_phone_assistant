@@ -3,6 +3,7 @@ from src.db.config import db
 from bson import ObjectId
 
 from src.openai.openai_handler import create_assistant
+from werkzeug.security import check_password_hash, generate_password_hash
 
 auth_api = Blueprint('auth_api', __name__)
 
@@ -32,12 +33,14 @@ def create_new_user():
                 'user_id': str(existing_username['_id'])
             }), 400
 
+        hashed_password = generate_password_hash(password, method='sha256')
+
         user_id = ObjectId()
         user_data = {
             '_id': user_id,
             'username': username,
             'email': email,
-            'password': password
+            'password': hashed_password  # Store the hashed password
         }
 
         personal_assistant = create_assistant("")
@@ -54,6 +57,26 @@ def create_new_user():
         }
         db['personal_profiles'].insert_one(personal_profile_data)
         return jsonify({'message': 'Data inserted successfully', 'user_id': str(user_id)}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_api.route('/api/auth/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return jsonify({'error': 'Missing username or password'}), 400
+
+        user = db['user_accounts'].find_one({'username': username})
+        if user and check_password_hash(user['password'], password):
+            return jsonify({'message': 'Login successful', 'user_id': str(user['_id'])}), 200
+        else:
+            return jsonify({'error': 'Invalid username or password'}), 401
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
