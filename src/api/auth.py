@@ -33,7 +33,7 @@ def create_new_user():
                 'user_id': str(existing_username['_id'])
             }), 400
 
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password)
 
         user_id = ObjectId()
         user_data = {
