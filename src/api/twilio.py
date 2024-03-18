@@ -22,5 +22,19 @@ def get_available_numbers():
         return jsonify({'error': str(e)}), 500
 
 
+@twilio_api.route('/api/twilio/get-active-number/<user_id>', methods=['GET'])
+def get_active_number(user_id):
+    try:
+        user_accounts_collection = db['user_accounts']
+        account = user_accounts_collection.find_one({'_id': ObjectId(user_id)})
+        if not account:
+            return jsonify({'error': 'account not found'}), 404
+
+        return jsonify({'active_number': account.get('number', 'No active number associated to this account')}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 def register_twilio_api(app):
     app.register_blueprint(twilio_api)
