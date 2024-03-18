@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from src.db.config import db
 from bson import ObjectId
-from twilio.rest import Client
 
 from src.openai.openai_handler import create_assistant
 
@@ -60,5 +59,5 @@ def create_new_user():
         return jsonify({'error': str(e)}), 500
 
 
-def register_twilio_api(app):
+def register_auth_api(app):
     app.register_blueprint(auth_api)

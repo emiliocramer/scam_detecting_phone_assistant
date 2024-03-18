@@ -2,7 +2,7 @@ import json
 
 from flask import request, jsonify, Blueprint
 from src.db.config import db
-from src.api.twilio import twilio_api
+from src.api.auth import twilio_api
 from bson import ObjectId
 
 from src.openai.openai_handler import modify_assistant
