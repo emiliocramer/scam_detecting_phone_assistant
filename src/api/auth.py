@@ -40,7 +40,8 @@ def create_new_user():
             '_id': user_id,
             'username': username,
             'email': email,
-            'password': hashed_password
+            'password': hashed_password,
+            'number': ''
         }
 
         personal_assistant = create_assistant("")
