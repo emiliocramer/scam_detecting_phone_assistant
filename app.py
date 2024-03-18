@@ -8,6 +8,7 @@ import os
 
 from src.db.config import db
 from src.api.profile import register_profile_api
+from src.api.twilio import register_twilio_api
 from src.openai.openai_handler import create_thread
 from src.twilio.twilio_handler import handle_incoming_call, handle_stream
 from twilio.rest import Client
@@ -23,6 +24,7 @@ app = Flask(__name__)
 CORS(app)
 register_auth_api(app)
 register_profile_api(app)
+register_twilio_api(app)
 sock = Sock(app)
 
 call_start_time = 0
