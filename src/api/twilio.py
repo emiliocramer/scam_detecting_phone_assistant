@@ -38,5 +38,31 @@ def get_active_number(user_id):
         return jsonify({'error': str(e)}), 500
 
 
+@twilio_api.route('/api/twilio/assign-number/<user_id>', methods=['PUT'])
+def assign_phone_number(user_id):
+    try:
+        data = request.get_json()
+        user_accounts_collection = db['user_accounts']
+        account = user_accounts_collection.find_one({'_id': ObjectId(user_id)})
+        if not account:
+            return jsonify({'error': 'account not found'}), 404
+
+        result = user_accounts_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {
+                'number': data['number'],
+            }}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({'message': 'No changes were made to the profile'}), 200
+
+        return jsonify({'message': 'Profile updated successfully'}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
 def register_twilio_api(app):
     app.register_blueprint(twilio_api)
