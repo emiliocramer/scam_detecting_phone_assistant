@@ -42,6 +42,7 @@ def get_active_number(user_id):
 def assign_phone_number(user_id):
     try:
         data = request.get_json()
+        print(data)
         user_accounts_collection = db['user_accounts']
         account = user_accounts_collection.find_one({'_id': ObjectId(user_id)})
         if not account:
