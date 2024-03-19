@@ -104,7 +104,13 @@ def generate_verdict(verdict_thread_id, lines):
 
 def update_call_with_action(twiml_response):
     try:
+        if not call_sid:
+            app_logger.error('No call SID available to update the call.')
+            return
+
+        app_logger.debug(f"Attempting to update call with TwiML: {twiml_response}")
+
         call = twilio_client.calls(call_sid).update(twiml=twiml_response)
         app_logger.debug(f"Call updated with response: {call.sid}")
     except TwilioRestException as e:
-        app_logger.error(f'Failed to update call: {e}')
+        app_logger.error(f'Failed to update call: {e.msg} - Code: {e.code}')
