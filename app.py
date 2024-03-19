@@ -60,13 +60,7 @@ def stream(ws, user_id):
         openai_ids['response_assistant_id'] = str(profile['assistant_id'])
         closing_line = profile['closing_line']
 
-        twilio_user = db['twilio_users'].find_one({'_id': ObjectId(user_id)})
-        if not twilio_user:
-            app_logger.error(f'twilio user not found for userId {user_id}')
-            return jsonify({'error': 'Twilio User not found'}), 404
-
-        twilio_client = Client(twilio_user['account_sid'], twilio_user['auth_token'])
-        return handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client)
+        return handle_stream(ws, call_start_time, openai_ids, closing_line)
     except Exception as e:
         app_logger.error(f'Error in stream route: {e}', exc_info=True)
         return "An error occurred", 500

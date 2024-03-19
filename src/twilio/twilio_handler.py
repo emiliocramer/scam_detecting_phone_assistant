@@ -43,7 +43,7 @@ def handle_incoming_call(request, user_id):
         response.say(opening_line)
         app_logger.info(f"Opening line delivered - UserID: {user_id}, Line: {opening_line}")
 
-        record_timeout = 10000  # Default timeout for recording
+        record_timeout = 10000
         record = Record(timeout=record_timeout)
         response.append(record)
         app_logger.info(f"Call recording started - Timeout: {record_timeout}ms")
@@ -54,7 +54,7 @@ def handle_incoming_call(request, user_id):
         return jsonify({'error': 'Internal Server Error'}), 500
 
 
-def handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client):
+def handle_stream(ws, call_start_time, openai_ids, closing_line):
     app_logger.debug("entered audio stream")
     global lines
     global rec
@@ -77,7 +77,6 @@ def handle_stream(ws, call_start_time, openai_ids, closing_line, twilio_client):
                     call_sid,
                     openai_ids,
                     closing_line,
-                    twilio_client
                 )
 
     except ConnectionClosed:

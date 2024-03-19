@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from src.db.config import db
 from bson import ObjectId
 from src.config import twilio_client
-from src.openai.openai_handler import create_assistant
 
 twilio_api = Blueprint('twilio_api', __name__)
 
@@ -54,11 +53,17 @@ def assign_phone_number(user_id):
                 'number': data['number'],
             }}
         )
-
         if result.modified_count == 0:
             return jsonify({'message': 'No changes were made to the profile'}), 200
 
-        return jsonify({'message': 'Profile updated successfully'}), 200
+        new_voice_url = f'https://hang-up-c98880200178.herokuapp.com/call/{user_id}'
+        all_numbers = twilio_client.incoming_phone_numbers.list()
+        matching_number = next((n for n in all_numbers if n.phone_number == data['number']), None)
+        if matching_number:
+            matching_number.update(voice_url=new_voice_url)
+            return jsonify({'message': 'Profile and Twilio number updated successfully'}), 200
+        else:
+            return jsonify({'message': 'Unable to link new number to phone number'}), 400
 
     except Exception as e:
         print(e)

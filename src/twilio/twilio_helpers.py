@@ -7,11 +7,12 @@ from twilio.base.exceptions import TwilioRestException
 from src.openai.openai_handler import send_message_to_assistant, run_assistant, handle_get_assistant_response
 from src.config import VERDICT_ASSISTANT_ID
 from src.utils import add_line_to_log, app_logger
+from src.config import twilio_client
 
 call_sid = ""
 
 
-def handle_incoming_packet(packet, rec, utterance, silence_counter, lines, sid, openai_ids, closing_line, twilio_client):
+def handle_incoming_packet(packet, rec, utterance, silence_counter, lines, sid, openai_ids, closing_line):
     global call_sid
     call_sid = sid
 
@@ -29,7 +30,6 @@ def handle_incoming_packet(packet, rec, utterance, silence_counter, lines, sid, 
             utterance,
             lines,
             openai_ids,
-            twilio_client
         )
 
     return utterance, silence_counter, lines
@@ -50,7 +50,7 @@ def is_partial_waveform(rec, silence_counter):
     return 0
 
 
-def handle_process_utterance(utterance, lines, openai_ids, twilio_client):
+def handle_process_utterance(utterance, lines, openai_ids):
     updated_lines = lines
     app_logger.debug("silence threshold met")
 
@@ -59,7 +59,6 @@ def handle_process_utterance(utterance, lines, openai_ids, twilio_client):
             utterance.strip(),
             lines,
             openai_ids,
-            twilio_client
         )
     return 0, "", updated_lines
 
@@ -72,14 +71,13 @@ def process_utterance(utterance, lines, openai_ids, twilio_client):
         utterance,
         lines,
         openai_ids['response_assistant_id'],
-        twilio_client
     )
     log_with_verdict = generate_verdict(openai_ids['verdict_thread_id'], log_with_response)
 
     return log_with_verdict
 
 
-def generate_response(response_thread_id, utterance, lines, response_assistant_id, twilio_client):
+def generate_response(response_thread_id, utterance, lines, response_assistant_id):
     _ = send_message_to_assistant(thread_id=response_thread_id, message=utterance)
     response_run = run_assistant(thread_id=response_thread_id, assistant_id=response_assistant_id)
 
@@ -88,7 +86,7 @@ def generate_response(response_thread_id, utterance, lines, response_assistant_i
     app_logger.debug(f"response generated: {response}")
 
     twiml_response = f'<Response><Say>{response}</Say><Pause length="30" /></Response>'
-    update_call_with_action(twiml_response, twilio_client)
+    update_call_with_action(twiml_response)
 
     lines = add_line_to_log(lines, response, 'assistant')
     return lines
@@ -104,7 +102,7 @@ def generate_verdict(verdict_thread_id, lines):
     return lines
 
 
-def update_call_with_action(twiml_response, twilio_client):
+def update_call_with_action(twiml_response):
     try:
         call = twilio_client.calls(call_sid).update(twiml=twiml_response)
         app_logger.debug(f"Call updated with response: {call.sid}")
