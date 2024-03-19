@@ -80,4 +80,5 @@ def handle_stream(ws, call_start_time, openai_ids, closing_line):
                 )
 
     except ConnectionClosed:
+        return
         # save_call_log(call_start_time, lines)
