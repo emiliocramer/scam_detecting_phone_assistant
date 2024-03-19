@@ -25,6 +25,7 @@ silence_counter = 0
 def handle_incoming_call(request, user_id):
     global call_sid
     try:
+        call_sid = request.form["CallSid"]
         app_logger.info(f"Handling incoming call - SID: {call_sid}, UserID: {user_id}")
 
         profile = db['personal_profiles'].find_one({'_id': ObjectId(user_id)})
