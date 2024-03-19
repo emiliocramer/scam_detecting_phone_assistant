@@ -63,7 +63,7 @@ def handle_process_utterance(utterance, lines, openai_ids):
     return 0, "", updated_lines
 
 
-def process_utterance(utterance, lines, openai_ids, twilio_client):
+def process_utterance(utterance, lines, openai_ids):
     app_logger.debug(f"sending the following message to the assistant: {utterance}")
 
     log_with_response = generate_response(
