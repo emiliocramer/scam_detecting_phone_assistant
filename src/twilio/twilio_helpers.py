@@ -111,6 +111,6 @@ def update_call_with_action(twiml_response):
         app_logger.debug(f"Attempting to update call with TwiML: {twiml_response}")
 
         call = twilio_client.calls(call_sid).update(twiml=twiml_response)
-        app_logger.debug(f"Call updated with response: {call.sid}")
+        app_logger.info(f"Call updated with response: {twiml_response}")
     except TwilioRestException as e:
         app_logger.error(f'Failed to update call: {e.msg} - Code: {e.code}')
